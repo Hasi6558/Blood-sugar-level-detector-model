@@ -1,0 +1,77 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# Data and model output
+*.h5
+*.keras
+*.ckpt
+*.pb
+*.tflite
+*.log
+*.csv
+*.npz
+*.npy
+*.pkl
+*.joblib
+
+# Keras Tuner directories
+keras_tuner_sugar_level/
+keras_tuner_sugar_level_bs16/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Test and temp folders
+New folder/
+test/
+
+# Plots and images
+*.png
+*.jpg
+*.jpeg
+*.bmp
+*.gif
+*.tiff
+
+# Ignore Data folder (if you want to keep it local only)
+# Data/
