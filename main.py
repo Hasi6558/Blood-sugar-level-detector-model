@@ -12,6 +12,7 @@ import seaborn as sns
 import keras_tuner as kt
 from tensorflow.keras.callbacks import EarlyStopping
 import tensorflow as tf
+from datetime import datetime
 
 # Update paths for local execution
 base_dir = '/home/hasindu-shehan/Desktop/Blood sugar level detector/Blood-sugar-level-detector-model'
@@ -52,22 +53,31 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 model = Sequential([
     Conv2D(filters=32, kernel_size=(3, 3), activation='relu', input_shape=(image_size[0], image_size[1], 3)),
     MaxPooling2D(pool_size=(2, 2)),
-    Conv2D(filters=64, kernel_size=(3, 3), activation='relu'),  # Added Conv2D layer
-    MaxPooling2D(pool_size=(2, 2)),  # Added MaxPooling2D layer
-    Conv2D(filters=128, kernel_size=(3, 3), activation='relu'),  # Added Conv2D layer
-    MaxPooling2D(pool_size=(2, 2)),
-    Conv2D(filters=256, kernel_size=(3, 3), activation='relu'),  # Added Conv2D layer
-    MaxPooling2D(pool_size=(2, 2)),
+    # Conv2D(filters=64, kernel_size=(3, 3), activation='relu'),  # Added Conv2D layer
+    # MaxPooling2D(pool_size=(2, 2)),  # Added MaxPooling2D layer
+    # Conv2D(filters=128, kernel_size=(3, 3), activation='relu'),  # Added Conv2D layer
+    # MaxPooling2D(pool_size=(2, 2)),
+    # Conv2D(filters=256, kernel_size=(3, 3), activation='relu'),  # Added Conv2D layer
+    # MaxPooling2D(pool_size=(2, 2)),
     Dropout(0.2),
     Flatten(),
     Dense(64, activation='relu'),
     Dense(1)  # Output layer for regression
 ])
 
-model.summary()  # Show model architecture summary
-print(f"Number of layers in the model: {len(model.layers)}")
+# Record the training start time
+training_start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-# exit()  # Stop execution after showing the summary
+# Extract model summary details
+model_summary = []
+model.summary(print_fn=lambda x: model_summary.append(x))
+model_summary = "\n".join(model_summary)
+
+# Prepare data for the Excel sheet
+results_data = {
+    'Training Start Time': [training_start_time],
+    'Model Summary': [model_summary],
+}
 
 model.compile(optimizer=Adam(learning_rate=0.001), loss='mse', metrics=['mae'])
 
@@ -78,7 +88,9 @@ y_pred = model.predict(X_test).flatten()
 
 # Calculate and print R^2 value
 r2 = r2_score(y_test, y_pred)
-print(f"R^2 Score: {r2:.4f}")
+results_data['R^2 Score'] = [r2]
+results_data['MAE'] = [history.history['mae'][-1]]
+results_data['Validation MAE'] = [history.history['val_mae'][-1]]
 
 # 1. Loss Curves (Training vs Validation)
 plt.figure(figsize=(8, 5))
@@ -218,7 +230,7 @@ print(f"Model saved to {model_path}")
 # """)
 
 # Train the baseline model as the main model
-history = model.fit(X_train, y_train, epochs=50, batch_size=32, validation_split=0.2, verbose=1)
+# history = model.fit(X_train, y_train, epochs=50, batch_size=32, validation_split=0.2, verbose=1)
 
 # Evaluate the baseline model on the test set
 test_loss, test_mae = model.evaluate(X_test, y_test, verbose=1)
@@ -228,3 +240,12 @@ print(f"Test Loss: {test_loss}, Test MAE: {test_mae}")
 baseline_model_path = os.path.join(base_dir, 'baseline_sugar_level_model.keras')
 model.save(baseline_model_path)
 print(f"Baseline model saved to {baseline_model_path}")
+
+# Create a DataFrame
+results_df = pd.DataFrame(results_data)
+
+# Save to an Excel file
+excel_path = os.path.join(base_dir, 'training_results.xlsx')
+results_df.to_excel(excel_path, index=False)
+
+print(f"Training results saved to {excel_path}")
