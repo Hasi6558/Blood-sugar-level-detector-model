@@ -52,14 +52,17 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 model = Sequential([
     Conv2D(filters=32, kernel_size=(3, 3), activation='relu', input_shape=(image_size[0], image_size[1], 3)),
     MaxPooling2D(pool_size=(2, 2)),
+    Conv2D(filters=64, kernel_size=(3, 3), activation='relu'),  # Added Conv2D layer
+    MaxPooling2D(pool_size=(2, 2)),  # Added MaxPooling2D layer
+    Conv2D(filters=128, kernel_size=(3, 3), activation='relu'),  # Added Conv2D layer
+    MaxPooling2D(pool_size=(2, 2)),
+    Conv2D(filters=256, kernel_size=(3, 3), activation='relu'),  # Added Conv2D layer
+    MaxPooling2D(pool_size=(2, 2)),
     Dropout(0.2),
     Flatten(),
     Dense(64, activation='relu'),
     Dense(1)  # Output layer for regression
 ])
-
-model.add(Conv2D(filters=64, kernel_size=(3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
 
 model.summary()  # Show model architecture summary
 print(f"Number of layers in the model: {len(model.layers)}")
@@ -68,11 +71,8 @@ print(f"Number of layers in the model: {len(model.layers)}")
 
 model.compile(optimizer=Adam(learning_rate=0.001), loss='mse', metrics=['mae'])
 
-# Add early stopping callback
-early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
-
-# Update model training to include early stopping
-history = model.fit(X_train, y_train, epochs=100, batch_size=32, validation_split=0.2, verbose=1, callbacks=[early_stopping])
+# Updated model training to remove early stopping
+history = model.fit(X_train, y_train, epochs=100, batch_size=32, validation_split=0.2, verbose=1)
 
 y_pred = model.predict(X_test).flatten()
 
