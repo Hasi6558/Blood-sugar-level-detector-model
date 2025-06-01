@@ -58,6 +58,9 @@ model = Sequential([
     Dense(1)  # Output layer for regression
 ])
 
+model.add(Conv2D(filters=64, kernel_size=(3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+
 model.summary()  # Show model architecture summary
 print(f"Number of layers in the model: {len(model.layers)}")
 
