@@ -153,96 +153,75 @@ model.save(model_path)
 
 print(f"Model saved to {model_path}")
 
+# Commenting out hyperparameter tuning and using the baseline model as the main model
 # --- Keras Tuner for Hyperparameter Tuning ---
 # Define the model-building function for Keras Tuner
-def build_model(hp):
-    model = Sequential()
-    model.add(tf.keras.layers.Input(shape=(image_size[0], image_size[1], 3)))
-    # Tune the number of Conv2D layers
-    for i in range(hp.Int('num_conv_layers', min_value=1, max_value=3)):
-        model.add(Conv2D(
-            filters=hp.Int(f'filters_{i}', min_value=16, max_value=64, step=16),
-            kernel_size=hp.Choice(f'kernel_size_{i}', values=[3, 5]),
-            activation='relu'
-        ))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
+# def build_model(hp):
+#     model = Sequential()
+#     model.add(tf.keras.layers.Input(shape=(image_size[0], image_size[1], 3)))
+#     # Tune the number of Conv2D layers
+#     for i in range(hp.Int('num_conv_layers', min_value=1, max_value=3)):
+#         model.add(Conv2D(
+#             filters=hp.Int(f'filters_{i}', min_value=16, max_value=64, step=16),
+#             kernel_size=hp.Choice(f'kernel_size_{i}', values=[3, 5]),
+#             activation='relu'
+#         ))
+#         model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    # Tune the dropout rate
-    model.add(Dropout(hp.Float('dropout', min_value=0.1, max_value=0.5, step=0.1)))
-    model.add(Flatten())
+#     # Tune the dropout rate
+#     model.add(Dropout(hp.Float('dropout', min_value=0.1, max_value=0.5, step=0.1)))
+#     model.add(Flatten())
 
-    # Tune the number of dense units
-    model.add(Dense(hp.Int('dense_units', min_value=32, max_value=128, step=32), activation='relu'))
-    model.add(Dense(1))  # Output layer for regression
+#     # Tune the number of dense units
+#     model.add(Dense(hp.Int('dense_units', min_value=32, max_value=128, step=32), activation='relu'))
+#     model.add(Dense(1))  # Output layer for regression
 
-    # Tune the optimizer and learning rate
-    optimizer = hp.Choice('optimizer', values=['adam', 'sgd', 'rmsprop'])
-    learning_rate = hp.Choice('learning_rate', values=[1e-2, 1e-3, 1e-4])
-    if optimizer == 'adam':
-        opt = Adam(learning_rate=learning_rate)
-    elif optimizer == 'sgd':
-        opt = tf.keras.optimizers.SGD(learning_rate=learning_rate)
-    elif optimizer == 'rmsprop':
-        opt = tf.keras.optimizers.RMSprop(learning_rate=learning_rate)
+#     # Tune the optimizer and learning rate
+#     optimizer = hp.Choice('optimizer', values=['adam', 'sgd', 'rmsprop'])
+#     learning_rate = hp.Choice('learning_rate', values=[1e-2, 1e-3, 1e-4])
+#     if optimizer == 'adam':
+#         opt = Adam(learning_rate=learning_rate)
+#     elif optimizer == 'sgd':
+#         opt = tf.keras.optimizers.SGD(learning_rate=learning_rate)
+#     elif optimizer == 'rmsprop':
+#         opt = tf.keras.optimizers.RMSprop(learning_rate=learning_rate)
 
-    model.compile(optimizer=opt, loss='mse', metrics=['mae'])
-    return model
+#     model.compile(optimizer=opt, loss='mse', metrics=['mae'])
+#     return model
 
 # Initialize the Keras Tuner
-tuner = kt.RandomSearch(
-    build_model,
-    objective='val_loss',  # Optimize for validation loss
-    max_trials=10,  # Number of different hyperparameter combinations to try
-    executions_per_trial=1,  # Number of models to train per trial
-    directory=base_dir,  # Directory to save tuner results
-    project_name='keras_tuner_sugar_level'
-)
+# tuner = kt.RandomSearch(
+#     build_model,
+#     objective='val_loss',  # Optimize for validation loss
+#     max_trials=10,  # Number of different hyperparameter combinations to try
+#     executions_per_trial=1,  # Number of models to train per trial
+#     directory=base_dir,  # Directory to save tuner results
+#     project_name='keras_tuner_sugar_level'
+# )
 
 # Perform the search
-tuner.search(X_train, y_train, epochs=10, validation_split=0.2, batch_size=32, verbose=1)
+# tuner.search(X_train, y_train, epochs=10, validation_split=0.2, batch_size=32, verbose=1)
 
 # Retrieve the best hyperparameters
-best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
-print(f"""
-The optimal number of Conv2D layers is {best_hps.get('num_conv_layers')},
-the optimal number of filters per layer is {[best_hps.get(f'filters_{i}') for i in range(best_hps.get('num_conv_layers'))]},
-the optimal kernel sizes are {[best_hps.get(f'kernel_size_{i}') for i in range(best_hps.get('num_conv_layers'))]},
-the optimal dropout rate is {best_hps.get('dropout')},
-the optimal number of dense units is {best_hps.get('dense_units')},
-the optimal optimizer is {best_hps.get('optimizer')},
-the optimal learning rate is {best_hps.get('learning_rate')}.
-""")
+# best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
+# print(f"""
+# The optimal number of Conv2D layers is {best_hps.get('num_conv_layers')},
+# the optimal number of filters per layer is {[best_hps.get(f'filters_{i}') for i in range(best_hps.get('num_conv_layers'))]},
+# the optimal kernel sizes are {[best_hps.get(f'kernel_size_{i}') for i in range(best_hps.get('num_conv_layers'))]},
+# the optimal dropout rate is {best_hps.get('dropout')},
+# the optimal number of dense units is {best_hps.get('dense_units')},
+# the optimal optimizer is {best_hps.get('optimizer')},
+# the optimal learning rate is {best_hps.get('learning_rate')}.
+# """)
 
-# Train the best model with the optimal hyperparameters
-best_model = tuner.hypermodel.build(best_hps)
-history = best_model.fit(X_train, y_train, epochs=50, validation_split=0.2, batch_size=32, verbose=1)
+# Train the baseline model as the main model
+history = model.fit(X_train, y_train, epochs=50, batch_size=32, validation_split=0.2, verbose=1)
 
-# Evaluate the best model on the test set
-test_loss, test_mae = best_model.evaluate(X_test, y_test, verbose=1)
+# Evaluate the baseline model on the test set
+test_loss, test_mae = model.evaluate(X_test, y_test, verbose=1)
 print(f"Test Loss: {test_loss}, Test MAE: {test_mae}")
 
-# Save the best model
-best_model_path = os.path.join(base_dir, 'best_sugar_level_model.keras')
-best_model.save(best_model_path)
-print(f"Best model saved to {best_model_path}")
-
-# Create a Learning Rate vs Loss plot
-plt.figure(figsize=(8, 5))
-learning_rates = [1e-2, 1e-3, 1e-4]
-losses = []
-
-# Evaluate the model for each learning rate
-for lr in learning_rates:
-    model = tuner.hypermodel.build(best_hps)
-    model.compile(optimizer=Adam(learning_rate=lr), loss='mse', metrics=['mae'])
-    history = model.fit(X_train, y_train, epochs=10, validation_split=0.2, batch_size=32, verbose=0)
-    losses.append(min(history.history['val_loss']))
-
-plt.plot(learning_rates, losses, marker='o')
-plt.xscale('log')
-plt.xlabel('Learning Rate')
-plt.ylabel('Validation Loss')
-plt.title('Learning Rate vs Loss')
-plt.tight_layout()
-plt.savefig(os.path.join(base_dir, 'learning_rate_vs_loss.png'))
-plt.close()
+# Save the baseline model
+baseline_model_path = os.path.join(base_dir, 'baseline_sugar_level_model.keras')
+model.save(baseline_model_path)
+print(f"Baseline model saved to {baseline_model_path}")
