@@ -63,13 +63,7 @@ desktop.ini
 New folder/
 test/
 
-# Plots and images
-*.png
-*.jpg
-*.jpeg
-*.bmp
-*.gif
-*.tiff
+
 
 # Ignore Data folder (if you want to keep it local only)
 # Data/
