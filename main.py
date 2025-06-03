@@ -15,7 +15,7 @@ import tensorflow as tf
 from datetime import datetime
 
 # Update paths for local execution
-base_dir = '/home/hasindu-shehan/Desktop/Blood sugar level detector/Blood-sugar-level-detector-model'
+base_dir = r'C:\Users\pasin\Desktop\new\Blood-sugar-level-detector-model'
 train_data_path = 'train_data.csv'
 data_dir = os.path.join(base_dir, 'Data')
 
