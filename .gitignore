@@ -41,7 +41,6 @@ venv.bak/
 
 # Data and model output
 *.h5
-*.keras
 *.ckpt
 *.pb
 *.tflite
